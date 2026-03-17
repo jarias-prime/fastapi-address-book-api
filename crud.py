@@ -14,7 +14,7 @@ def get_addresses(db: Session):
 
 def update_address(db: Session, address_id: int, updated_data):
     address = db.query(models.Address).filter(models.Address.id == address_id).first()
-    
+
     if not address:
         return None
     for key, value in updated_data.dict().items():
@@ -33,5 +33,5 @@ def delete_address(db: Session, address_id: int):
 
     db.delete(address)
     db.commit()
-    
+
     return address
