@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 import math
 
@@ -27,9 +27,24 @@ def get_db():
 def create_address(address: schemas.AddressCreate, db: Session = Depends(get_db)):
     return crud.create_address(db, address)
 
-@app.get("/addresses", response_model=list[schemas.AddressOut])
-def get_all_addresses(db: Session = Depends(get_db)):
-    return crud.get_addresses(db)
+@app.get("/addresses")
+def get_all_addresses(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    data = crud.get_addresses(db, page, page_size)
+    total = db.query(models.Address).count()
+
+    total_pages = (total + page_size - 1) // page_size
+
+    return {
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": total_pages,
+        "data": data
+    }
 
 @app.put("/addresses/{address_id}", response_model=schemas.AddressOut)
 def update_address(address_id: int, updated: schemas.AddressUpdate, db: Session = Depends(get_db)):

@@ -9,8 +9,10 @@ def create_address(db: Session, address):
 
     return db_address
 
-def get_addresses(db: Session):
-    return db.query(models.Address).all()
+def get_addresses(db: Session, page: int = 1, page_size: int = 10):
+    offset = (page - 1) * page_size
+
+    return db.query(models.Address).offset(offset).limit(page_size).all()
 
 def update_address(db: Session, address_id: int, updated_data):
     address = db.query(models.Address).filter(models.Address.id == address_id).first()
